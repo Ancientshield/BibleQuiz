@@ -33,18 +33,18 @@
 		<!-- Options Section (Bottom 50%) -->
 		<div v-if="!gameOver" class="options-section">
 			<button
-				v-for="(option, index) in currentQuestion.options"
+				v-for="(option, index) in shuffledOptions"
 				:key="index"
 				:class="[
 					'option-btn',
 					`option-${index}`,
 					{
 						selected: selectedOption === index,
-						correct: showAnswer && index === currentQuestion.correctIndex,
+						correct: showAnswer && index === shuffledCorrectIndex,
 						incorrect:
 							showAnswer &&
 							selectedOption === index &&
-							selectedOption !== currentQuestion.correctIndex,
+							selectedOption !== shuffledCorrectIndex,
 					},
 				]"
 				:disabled="showAnswer"
@@ -122,6 +122,8 @@
 	const correctAnswers = ref(0);
 	const timer = ref(10);
 	const timerInterval = ref(null);
+	const shuffledOptions = ref([]);
+	const shuffledCorrectIndex = ref(0);
 
 	// 計算屬性
 	const currentQuestion = computed(() => questions[currentQuestionIndex.value]);
@@ -131,6 +133,27 @@
 	const timerPercentage = computed(() => (timer.value / 10) * 100);
 
 	// 方法
+	const shuffleOptions = () => {
+		const currentQ = currentQuestion.value;
+		const originalOptions = [...currentQ.options];
+		const originalCorrectOption = originalOptions[currentQ.correctIndex];
+
+		// 洗牌算法 (Fisher-Yates shuffle)
+		const shuffled = [...originalOptions];
+		for (let i = shuffled.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+		}
+
+		// 找出正確答案在洗牌後的位置
+		const newCorrectIndex = shuffled.findIndex(
+			(option) => option === originalCorrectOption
+		);
+
+		shuffledOptions.value = shuffled;
+		shuffledCorrectIndex.value = newCorrectIndex;
+	};
+
 	const selectOption = (index) => {
 		if (!showAnswer.value) {
 			selectedOption.value = index;
@@ -142,7 +165,7 @@
 	const checkAnswer = () => {
 		showAnswer.value = true;
 
-		if (selectedOption.value === currentQuestion.value.correctIndex) {
+		if (selectedOption.value === shuffledCorrectIndex.value) {
 			correctAnswers.value++;
 		}
 
@@ -154,6 +177,7 @@
 				currentQuestionIndex.value++;
 				selectedOption.value = null;
 				showAnswer.value = false;
+				shuffleOptions(); // 為下一題洗牌
 				startTimer();
 			}
 		}, 2000);
@@ -183,11 +207,13 @@
 		showAnswer.value = false;
 		gameOver.value = false;
 		correctAnswers.value = 0;
+		shuffleOptions(); // 為第一題洗牌
 		startTimer();
 	};
 
 	// 生命週期鉤子
 	onMounted(() => {
+		shuffleOptions(); // 初始化時洗牌
 		startTimer();
 	});
 
@@ -200,6 +226,11 @@
 		if (newValue) {
 			clearInterval(timerInterval.value);
 		}
+	});
+
+	// 當問題改變時，重新洗牌
+	watch(currentQuestionIndex, () => {
+		shuffleOptions();
 	});
 </script>
 
@@ -318,6 +349,11 @@
 		cursor: pointer;
 		transition: all 0.3s;
 		text-align: left;
+	}
+
+	.option-btn:hover:not(:disabled) {
+		background-color: #3a6a9a;
+		transform: scale(1.02);
 	}
 
 	.option-label {

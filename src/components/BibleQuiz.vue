@@ -285,15 +285,11 @@
 	}
 
 	.question {
-		display: flex;
-		justify-content: center;
 		font-size: 2rem;
 		padding: 20px;
-		height: 20vh;
 		background-color: #0d2b45;
 		border-radius: 10px;
 		text-align: center;
-		align-items: center;
 		box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
 	}
 
@@ -310,8 +306,8 @@
 
 	.option-btn {
 		display: flex;
-		flex-direction: column;
-		justify-content: center;
+		flex-direction: row;
+		justify-content: flex-start;
 		align-items: center;
 		padding: 15px;
 		background-color: #2a5a8a;
@@ -321,12 +317,7 @@
 		font-size: 1.2rem;
 		cursor: pointer;
 		transition: all 0.3s;
-		text-align: center;
-	}
-
-	.option-btn:hover:not(:disabled) {
-		background-color: #3a6a9a;
-		transform: scale(1.02);
+		text-align: left;
 	}
 
 	.option-label {
@@ -335,9 +326,11 @@
 		align-items: center;
 		width: 40px;
 		height: 40px;
+		min-width: 40px;
 		background-color: #0d2b45;
 		border-radius: 50%;
-		margin-bottom: 10px;
+		margin-right: 15px;
+		margin-bottom: 0;
 		font-size: 1.5rem;
 		font-weight: bold;
 	}
@@ -404,6 +397,17 @@
 
 		.option-text {
 			font-size: 1rem;
+		}
+
+		.options-section {
+			display: flex;
+			flex-direction: column;
+			height: 50vh;
+		}
+
+		.option-btn {
+			height: 12.5vh;
+			margin-bottom: 5px;
 		}
 	}
 </style>
